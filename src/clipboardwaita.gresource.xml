@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+    <gresource prefix="/com/github/digitalone1/clipboardwaita">
+        <file>app_window.ui</file>
+        <file>clipboard_list_row.ui</file>
+        <file>edit_item_dialog.ui</file>
+        <file>preferences_dialog.ui</file>
+        <file>shortcuts-dialog.ui</file>
+        <file>wrapping_toast.ui</file>
+    </gresource>
+</gresources>

@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="clipboardwaita">
+    <template class="PreferencesDialog" parent="AdwPreferencesDialog">
+        <child>
+            <object class="AdwPreferencesPage">
+                <child>
+                    <object class="AdwPreferencesGroup">
+                        <property name="title" translatable="yes">History</property>
+
+                        <child>
+                            <object class="AdwSwitchRow" id="clipboard_tracking_switch">
+                                <property name="title" translatable="yes">Clipboard tracking</property>
+                            </object>
+                        </child>
+
+                        <child>
+                            <object class="AdwComboRow" id="new_duplicate_entry_comborow">
+                                <property name="title" translatable="yes">New duplicate entry</property>
+                                <property name="tooltip-text" translatable="yes">Set the behavior for new content copied into the clipboard which has duplicate entries in the history</property>
+                                <property name="model">
+                                    <object class="GtkStringList">
+                                        <items>
+                                            <item translatable="yes">Insert</item>
+                                            <item translatable="yes">Do not insert</item>
+                                            <item translatable="yes">Remove old duplicates</item>
+                                        </items>
+                                    </object>
+                                </property>
+                            </object>
+                        </child>
+
+                        <child>
+                            <object class="AdwActionRow">
+                                <style>
+                                    <class name="spin" />
+                                </style>
+
+                                <property name="title" translatable="yes">Maximum entries</property>
+
+                                <child type="suffix">
+                                    <object class="GtkButton" id="apply_new_list_size_button">
+                                        <property name="sensitive">0</property>
+                                        <property name="visible">0</property>
+                                        <property name="halign">end</property>
+                                        <property name="valign">center</property>
+                                        <property name="icon-name">document-save-symbolic</property>
+                                        <property name="tooltip-text" translatable="yes">Apply new maximum value</property>
+
+                                        <style>
+                                            <class name="suggested-action" />
+                                        </style>
+                                    </object>
+                                </child>
+
+                                <child type="suffix">
+                                    <object class="GtkSpinButton" id="list_size_spinbutton">
+                                        <property name="halign">end</property>
+                                        <property name="valign">center</property>
+                                        <property name="numeric">1</property>
+                                        <property name="snap-to-ticks">1</property>
+                                        <property name="climb-rate">10</property>
+                                        <property name="xalign">0.5</property>
+                                        <property name="update-policy">if-valid</property>
+                                        <property name="adjustment">
+                                            <object class="GtkAdjustment">
+                                                <property name="lower">1</property>
+                                                <property name="upper">1000</property>
+                                                <property name="value">500</property>
+                                                <property name="page-increment">10</property>
+                                                <property name="step-increment">1</property>
+                                            </object>
+                                        </property>
+                                    </object>
+                                </child>
+                            </object>
+                        </child>
+                    </object>
+                </child>
+
+                <child>
+                    <object class="AdwPreferencesGroup">
+                        <property name="title" translatable="yes">Application</property>
+
+                        <child>
+                            <object class="AdwExpanderRow">
+                                <property name="title" translatable="yes">Background service</property>
+                                <property name="tooltip-text">Keep the application running when the window is closed</property>
+                                <property name="expanded" bind-source="background_service_switch" bind-property="active" bind-flags="sync-create|bidirectional" />
+
+                                <child type="suffix">
+                                    <object class="GtkSwitch" id="background_service_switch">
+                                        <property name="halign">end</property>
+                                        <property name="valign">center</property>
+                                    </object>
+                                </child>
+
+                                <child>
+                                    <object class="AdwSwitchRow" id="autoclose_on_copy_switch">
+                                        <property name="title" translatable="yes">Close on copy</property>
+                                        <property name="tooltip-text">Automatically close the window when an entry of the list is copied into the clipboard</property>
+                                        <property name="sensitive" bind-source="background_service_switch" bind-property="active" bind-flags="sync-create" />
+                                    </object>
+                                </child>
+                            </object>
+                        </child>
+                    </object>
+                </child>
+            </object>
+        </child>
+    </template>
+</interface>

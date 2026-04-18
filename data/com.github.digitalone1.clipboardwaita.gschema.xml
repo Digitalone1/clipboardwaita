@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+    <enum id="com.github.digitalone1.clipboardwaita.new.duplicate.entry.enum">
+        <value nick="Insert" value="0" />
+        <value nick="Do not insert" value="1" />
+        <value nick="Remove old duplicates" value="2" />
+    </enum>
+    <schema id="com.github.digitalone1.clipboardwaita" path="/com/github/digitalone1/clipboardwaita/" gettext-domain="clipboardwaita">
+        <key name="clipboard-tracking" type="b">
+            <default>false</default>
+        </key>
+
+        <key name="background-service-mode" type="b">
+            <default>false</default>
+        </key>
+        <key name="autoclose-on-copy" type="b">
+            <default>false</default>
+        </key>
+
+        <key name="new-duplicate-entry" enum="com.github.digitalone1.clipboardwaita.new.duplicate.entry.enum">
+            <default>"Insert"</default>
+        </key>
+
+        <!-- Changes to this option should be reflected into 
+             the list_size_spinrow inside the preferences UI -->
+        <key name="clipboard-history-size" type="u">
+            <range min="1" max="1000" />
+            <default>500</default>
+        </key>
+
+        <key name="window-width" type="i">
+            <default>-1</default>
+        </key>
+        <key name="window-height" type="i">
+            <default>-1</default>
+        </key>
+        <key name="window-maximized" type="b">
+            <default>false</default>
+        </key>
+    </schema>
+</schemalist>

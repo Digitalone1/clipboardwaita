@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+    <object class="AdwShortcutsDialog" id="shortcuts_dialog">
+        <child>
+            <object class="AdwShortcutsSection">
+                <property name="title" translatable="yes" context="shortcut window">History</property>
+                <child>
+                    <object class="AdwShortcutsItem">
+                        <property name="title" translatable="yes" context="shortcut window">Toggle clipboard tracking</property>
+                        <property name="action-name">app.clipboard-tracking</property>
+                    </object>
+                </child>
+                <child>
+                    <object class="AdwShortcutsItem">
+                        <property name="title" translatable="yes" context="shortcut window">Selection mode</property>
+                        <property name="action-name">app.selection</property>
+                    </object>
+                </child>
+                <child>
+                    <object class="AdwShortcutsItem">
+                        <property name="title" translatable="yes" context="shortcut window">Search mode</property>
+                        <property name="action-name">app.search</property>
+                    </object>
+                </child>
+            </object>
+        </child>
+        <child>
+            <object class="AdwShortcutsSection">
+                <property name="title" translatable="yes" context="shortcut window">Application</property>
+                <child>
+                    <object class="AdwShortcutsItem">
+                        <property name="title" translatable="yes" context="shortcut window">Toggle background service</property>
+                        <property name="action-name">app.background</property>
+                    </object>
+                </child>
+                <child>
+                    <object class="AdwShortcutsItem">
+                        <property name="title" translatable="yes" context="shortcut window">Close window</property>
+                        <property name="action-name">app.close-window</property>
+                    </object>
+                </child>
+                <child>
+                    <object class="AdwShortcutsItem">
+                        <property name="title" translatable="yes" context="shortcut window">Quit application</property>
+                        <property name="subtitle">Stop the background service</property>
+                        <property name="action-name">app.quit</property>
+                    </object>
+                </child>
+            </object>
+        </child>
+        <child>
+            <object class="AdwShortcutsSection">
+                <property name="title" translatable="yes" context="shortcut window">General</property>
+                <child>
+                    <object class="AdwShortcutsItem">
+                        <property name="title" translatable="yes" context="shortcut window">Show preferences</property>
+                        <property name="action-name">app.preferences</property>
+                    </object>
+                </child>
+                <child>
+                    <object class="AdwShortcutsItem">
+                        <property name="title" translatable="yes" context="shortcut window">Show keyboard shortcuts</property>
+                        <property name="action-name">app.shortcuts</property>
+                    </object>
+                </child>
+                <child>
+                    <object class="AdwShortcutsItem">
+                        <property name="title" translatable="yes" context="shortcut window">Show help</property>
+                        <property name="action-name">app.help</property>
+                    </object>
+                </child>
+            </object>
+        </child>
+    </object>
+</interface>

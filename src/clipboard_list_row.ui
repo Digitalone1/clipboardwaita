@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="clipboardwaita">
+    <template class="ItemRow" parent="GtkBox">
+        <property name="orientation">horizontal</property>
+        <property name="hexpand">1</property>
+        <property name="spacing">12</property>
+        <property name="margin-start">18</property>
+        <property name="margin-end">18</property>
+
+        <child>
+            <object class="GtkBox">
+                <property name="orientation">horizontal</property>
+                <property name="halign">start</property>
+                <property name="valign">center</property>
+
+                <child>
+                    <object class="GtkButton" id="item_copy_content_button">
+                        <property name="icon-name">edit-copy-symbolic</property>
+                        <property name="tooltip-text" translatable="yes">Copy this entry</property>
+                    </object>
+                </child>
+            </object>
+        </child>
+
+        <child>
+            <object class="GtkBox">
+                <property name="orientation">vertical</property>
+                <property name="hexpand">1</property>
+                <property name="valign">center</property>
+                <property name="spacing">4</property>
+                <property name="margin-top">6</property>
+                <property name="margin-bottom">6</property>
+
+                <child>
+                    <object class="GtkLabel" id="datetime_label">
+                        <property name="valign">start</property>
+                        <property name="halign">start</property>
+                        <property name="justify">left</property>
+                        <property name="xalign">0</property>
+                        <property name="lines">2</property>
+                        <property name="wrap">1</property>
+                        <property name="ellipsize">end</property>
+
+                        <style>
+                            <class name="caption" />
+                            <class name="dimmed" />
+                        </style>
+                    </object>
+                </child>
+
+                <child>
+                    <object class="GtkLabel" id="text_content_label">
+                        <property name="valign">start</property>
+                        <property name="halign">start</property>
+                        <property name="justify">left</property>
+                        <property name="single-line-mode">1</property>
+                        <property name="ellipsize">end</property>
+
+                        <style>
+                            <class name="document" />
+                        </style>
+                    </object>
+                </child>
+            </object>
+        </child>
+
+        <child>
+            <object class="GtkBox" id="action_right_container">
+                <property name="orientation">horizontal</property>
+                <property name="halign">end</property>
+                <property name="valign">center</property>
+                <property name="margin-start">6</property>
+
+                <child>
+                    <object class="GtkBox" id="action_right_box">
+                        <property name="orientation">horizontal</property>
+                        <property name="halign">end</property>
+                        <property name="valign">center</property>
+                        <property name="spacing">8</property>
+
+                        <child>
+                            <object class="GtkBox">
+                                <property name="orientation">horizontal</property>
+
+                                <child>
+                                    <object class="GtkButton" id="item_reset_button">
+                                        <property name="sensitive">0</property>
+                                        <property name="visible">0</property>
+                                        <property name="icon-name">edit-undo-symbolic</property>
+                                        <property name="tooltip-text" translatable="yes">Reset the original content</property>
+                                    </object>
+                                </child>
+
+                                <child>
+                                    <object class="GtkButton" id="item_edit_button">
+                                        <property name="icon-name">document-edit-symbolic</property>
+                                        <property name="tooltip-text" translatable="yes">Edit this entry</property>
+                                    </object>
+                                </child>
+
+                                <style>
+                                    <class name="linked" />
+                                </style>
+                            </object>
+                        </child>
+
+                        <child>
+                            <object class="GtkButton" id="item_remove_button">
+                                <property name="icon-name">user-trash-symbolic</property>
+                                <property name="tooltip-text" translatable="yes">Remove this entry</property>
+                            </object>
+                        </child>
+                    </object>
+                </child>
+
+                <child>
+                    <object class="GtkMenuButton" id="action_right_button_mobile">
+                        <property name="icon-name">view-more-symbolic</property>
+                        <property name="halign">end</property>
+                        <property name="valign">center</property>
+
+                        <property name="popover">
+                            <object class="GtkPopover">
+                                <property name="child">
+                                    <object class="GtkBox">
+                                        <property name="orientation">horizontal</property>
+                                        <property name="halign">end</property>
+                                        <property name="valign">center</property>
+                                        <property name="spacing">8</property>
+
+                                        <child>
+                                            <object class="GtkBox">
+                                                <property name="orientation">horizontal</property>
+
+                                                <child>
+                                                    <object class="GtkButton" id="item_reset_button_mobile">
+                                                        <property name="sensitive">0</property>
+                                                        <property name="visible">0</property>
+                                                        <property name="icon-name">edit-undo-symbolic</property>
+                                                        <property name="tooltip-text" translatable="yes">Reset the original content</property>
+                                                    </object>
+                                                </child>
+
+                                                <child>
+                                                    <object class="GtkButton" id="item_edit_button_mobile">
+                                                        <property name="icon-name">document-edit-symbolic</property>
+                                                        <property name="tooltip-text" translatable="yes">Edit this entry</property>
+                                                    </object>
+                                                </child>
+
+                                                <style>
+                                                    <class name="linked" />
+                                                </style>
+                                            </object>
+                                        </child>
+
+                                        <child>
+                                            <object class="GtkButton" id="item_remove_button_mobile">
+                                                <property name="icon-name">user-trash-symbolic</property>
+                                                <property name="tooltip-text" translatable="yes">Remove this entry</property>
+                                            </object>
+                                        </child>
+                                    </object>
+                                </property>
+                            </object>
+                        </property>
+                    </object>
+                </child>
+            </object>
+        </child>
+    </template>
+</interface>
