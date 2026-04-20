@@ -148,8 +148,12 @@ static void switch_clipboard_listbox_selection_mode(GtkToggleButton *self,
 }
 
 static void search_entry_text_changed(GtkSearchEntry *self, gpointer) {
-  // The search_changed signal is emitted also when the search bar is hidden
-  // and the search entry is automatically emptied.
+  /**
+   * The returned string is owned by the instance.
+   * We have to remember also that the search_changed signal is emitted even
+   * when the search bar is hidden and the search entry is automatically
+   * emptied.
+   */
   auto search_field_text = gtk_editable_get_text(GTK_EDITABLE(self));
 
   /**

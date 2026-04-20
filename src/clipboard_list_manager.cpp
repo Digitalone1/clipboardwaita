@@ -35,8 +35,8 @@ constexpr std::hash<std::string_view> str_hash;
  * The following map is used to quickly discover if a string is contained into
  * the list model using its hash.
  * Instead of looping the whole list, we calculate the hash and ask the map
- * to be sure a string is contained into the list model. For every hash,
- * various timastamps can be associated.
+ * to be sure that a string is contained into the list model.
+ * For every hash, various timastamps can be associated.
  * The map always refers to the modified hash (which contains the original
  * hash if the item is unchanged, or the new hash if the item is modified).
  * The timestamps instead always refers to the original timestamp, not the
@@ -52,9 +52,16 @@ GListStore *list_model = g_list_store_new(CBWAITA_TYPE_ITEM_HOLDER);
 GtkCustomFilter *search_filter =
     gtk_custom_filter_new(nullptr, nullptr, nullptr);
 
+/**
+ * Filter list model to select only the searched items.
+ */
 GtkFilterListModel *filtered_list_model = gtk_filter_list_model_new(
     G_LIST_MODEL(list_model), GTK_FILTER(search_filter));
 
+/**
+ * Folded tokens of the search key (to be checked against the folded tokens of
+ * every items).
+ */
 gchar **search_folded_tokens = nullptr;
 
 /*
@@ -158,10 +165,10 @@ auto equal_clipboard_items(gconstpointer a, gconstpointer b) -> gboolean {
   auto item_holder_a = static_cast<const ItemHolder *>(a);
   auto item_holder_b = static_cast<const ItemHolder *>(b);
 
-  auto cb_model_item_a = item_holder_get_data(item_holder_a);
-  auto cb_model_item_b = item_holder_get_data(item_holder_b);
+  auto model_item_a = item_holder_get_data(item_holder_a);
+  auto model_item_b = item_holder_get_data(item_holder_b);
 
-  return cb_model_item_a->timestamp == cb_model_item_b->timestamp ? 1 : 0;
+  return model_item_a->timestamp == cmodel_item_b->timestamp ? 1 : 0;
 }
 */
 
@@ -342,6 +349,7 @@ void list_store_remove_item_by_timestamp(const uint64_t timestamp) {
 
 /**
  * This method should always be used to set the folded_tokens index.
+ * Passed search_key is not owned.
  */
 void update_search_index(const char *search_key) {
   auto old_folded_tokens = search_folded_tokens;
@@ -417,7 +425,7 @@ void set_new_list_model_size(gpointer user_data) {
  *
  */
 void add_new_text_callback(gpointer user_data) {
-  auto text = static_cast<char *>(user_data);
+  const auto text = static_cast<const char *>(user_data);
 
   const auto text_hash = str_hash(text);
 
@@ -525,6 +533,11 @@ void add_new_text_callback(gpointer user_data) {
   return;
 }
 
+/**
+ * Update the filter list model with the GtkCustomFilterFunc using the
+ * search_folded_tokens.
+ * Passed search_key is not owned.
+ */
 void update_search_filter_callback(const char *search_key) {
   update_search_index(search_key);
 

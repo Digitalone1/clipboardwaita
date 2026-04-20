@@ -44,7 +44,7 @@ void clipboard_text_ready(GObject *source, GAsyncResult *res, gpointer) {
 
   // We take ownership of the text. If it is tracked inside the list model, we
   // should free it when the item will be deleted.
-  auto text =
+  const auto text =
       gdk_clipboard_read_text_finish(GDK_CLIPBOARD(source), res, &error);
 
   if (error != nullptr) {
