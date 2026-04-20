@@ -135,19 +135,33 @@ auto hash_map_get_timestamps(const size_t hash) -> std::vector<uint64_t> {
 }
 
 /**
- * Compares two items by their timestamps determining the order.
+ * Callback to compare two items. It's used by "g_list_store_insert_sorted" to
+ * keep the items sorted.
+ * This returns -1 if a<b, 1 if a>b or 0 if a=b.
+ * The items are first sorted by the pin flag and, then, by the original
+ * timestamp.
  */
 auto compare_clipboard_items(gconstpointer a, gconstpointer b, gpointer)
     -> gint {
   auto item_holder_a = static_cast<const ItemHolder *>(a);
   auto item_holder_b = static_cast<const ItemHolder *>(b);
 
-  auto cb_model_item_a = item_holder_get_data(item_holder_a);
-  auto cb_model_item_b = item_holder_get_data(item_holder_b);
+  auto model_item_a = item_holder_get_data(item_holder_a);
+  auto model_item_b = item_holder_get_data(item_holder_b);
 
-  if (cb_model_item_a->timestamp > cb_model_item_b->timestamp) {
+  // Pinned items should always be shown on top of unpinned ones.
+  if (model_item_a->pinned != model_item_b->pinned) {
+    return model_item_a->pinned ? -1 : 1;
+  }
+
+  /**
+   * The following may seem not intuitive, but we have to sort the items from
+   * the most recent to the oldest one, so we have to return -1 when the first
+   * timestamp is bigger than the second one.
+   */
+  if (model_item_a->timestamp > model_item_b->timestamp) {
     return -1;
-  } else if (cb_model_item_a->timestamp < cb_model_item_b->timestamp) {
+  } else if (model_item_a->timestamp < model_item_b->timestamp) {
     return 1;
   }
 
@@ -237,22 +251,31 @@ void shrink_list_from_position(const guint position, const guint n_removals,
  * sorted in reverse order (from the most recent to oldest timestamp), so it's
  * different than the usual binary search.
  *
- * The method returns the pointer to the found object and the caller takes its
- * ownership. The reference to position argument is set with the position of
- * the found object in the list.
- * Even if the model uses positions in guint type, we need left and right
- * variables as signed int since right can assume -1 to end the while loop.
- * If the timestamp is not found, the object pointer is NULL and position is
- * equal to n_items.
+ * If the n_items argument is not provided by the caller, it's calculated
+ * internally before making the search.
+ * The method returns a pair with the position and the pointer to the found
+ * item. If the item is not found, the position reference is set to n_items.
  */
-auto list_store_get_position_by_timestamp(const uint64_t timestamp,
-                                          const int n_items) -> guint {
+auto list_store_get_item_position_by_timestamp(const uint64_t timestamp,
+                                               const bool pinned,
+                                               const int n_items = -1)
+    -> std::pair<guint, ClipboardModelItem *> {
   // We need to cast our GIO List Store to a GIO List Model in order to use
   // g_list_model functions.
   auto list = G_LIST_MODEL(list_model);
 
+  // Set num_items in case n_items argument is not set,
+  const auto num_items =
+      n_items < 0 ? static_cast<int>(g_list_model_get_n_items(list)) : n_items;
+
+  /**
+   * Even if the model uses positions in guint type, we need left and right
+   * variables as signed int since right can assume -1 to end the while loop.
+   * If the timestamp is not found, the object pointer is NULL and position is
+   * equal to num_items
+   */
   auto left = 0;
-  auto right = n_items - 1;
+  auto right = num_items - 1;
 
   while (left <= right) {
     const auto mid = left + ((right - left) / 2);
@@ -262,18 +285,24 @@ auto list_store_get_position_by_timestamp(const uint64_t timestamp,
 
     auto model_item = item_holder_get_data(item_holder);
 
-    if (model_item->timestamp == timestamp) {
-      return mid;
+    if (model_item->pinned == pinned && model_item->timestamp == timestamp) {
+      return {static_cast<guint>(mid), model_item};
     }
 
-    if (model_item->timestamp > timestamp) {
+    if (model_item->pinned != pinned) {
+      if (model_item->pinned) {
+        left = mid + 1;
+      } else {
+        right = mid - 1;
+      }
+    } else if (model_item->timestamp > timestamp) {
       left = mid + 1;
     } else {
       right = mid - 1;
     }
   }
 
-  return n_items;
+  return {static_cast<guint>(num_items), nullptr};
 }
 
 auto search_filter_callback(GObject *item, gpointer user_data) -> gboolean {
@@ -321,30 +350,43 @@ auto search_filter_callback(GObject *item, gpointer user_data) -> gboolean {
 }
 
 /**
- * This method deletes the item using the timestamp which works as an index for
- * the GIO List Model since items are sorted by timestamps values. It should be
- * slightly efficient than using "g_list_store_find_with_equal_func" to
- * retrieve the position because it relies on
- * "list_store_get_position_by_timestamp" which uses the binary search (in
- * reverse order) to select the item position.
+ * This method deletes the item using the pinned state and the timestamp (which
+ * works as an index for the GIO List Model) since items are sorted by pin flag
+ * and timestamps values.
+ * It should be slightly efficient than using
+ * "g_list_store_find_with_equal_func" to retrieve the position because it
+ * relies on "list_store_get_item_position_by_timestamp" which uses the binary
+ * search (in reverse order) to select the item position.
+ *
+ * If the n_items argument is not provided by the caller, it's calculated
+ * internally before making the search.
+ * This function returns true if the item has been deleted or false if the item
+ * has not been found.
  */
-void list_store_remove_item_by_timestamp(const uint64_t timestamp) {
-  const auto n_items = g_list_model_get_n_items(G_LIST_MODEL(list_model));
+auto list_store_remove_item_by_timestamp(const uint64_t timestamp,
+                                         const bool pinned,
+                                         const int n_items = -1) -> bool {
+  const auto num_items =
+      n_items < 0
+          ? static_cast<int>(g_list_model_get_n_items(G_LIST_MODEL(list_model)))
+          : n_items;
 
-  const auto position =
-      list_store_get_position_by_timestamp(timestamp, n_items);
+  const auto search_result =
+      list_store_get_item_position_by_timestamp(timestamp, pinned, num_items);
 
-  if (position == n_items) {
-    g_debug("Trying to a non-existing item from the list model.");
+  if (search_result.first == static_cast<guint>(num_items)) {
+    g_debug("Trying to remove a non-existing item from the list model.");
 
-    return;
+    return false;
   }
 
   // Remove the item from the list model using its position.
-  g_list_store_remove(list_model, position);
+  g_list_store_remove(list_model, search_result.first);
 
   g_debug("Removed item from the list model with timestamp %s.",
           Util::to_string(timestamp).c_str());
+
+  return true;
 }
 
 /**
@@ -472,15 +514,49 @@ void add_new_text_callback(gpointer user_data) {
   }
 
   case 2: {
-    // Remove old duplicates: delete existing duplicates from the list model.
+    /**
+     * Remove old duplicates:
+     * Delete existing duplicates from the list model, but only if they are
+     * unpinned. If there are existing pinned items, the item is discarded.
+     */
     if (hash_map_contains(text_hash)) {
-      // Copy the vector of timestamps because we have to erase it from the map.
+      // Copy the vector of timestamps because we may to erase it from the map.
       const auto vector_ts = hash_map_get_timestamps(text_hash);
 
-      for (auto it = vector_ts.cbegin(); it != vector_ts.cend(); it++) {
-        hash_map_erase_ts(text_hash, *it);
+      bool pinned_item_found = false;
+      auto n_items = g_list_model_get_n_items(list);
 
-        list_store_remove_item_by_timestamp(*it);
+      for (auto it = vector_ts.cbegin(); it != vector_ts.cend(); it++) {
+        // Search for pinned item.
+        const auto result =
+            list_store_get_item_position_by_timestamp(*it, true, n_items);
+
+        if (result.first != n_items) {
+          // Found a pinned item. Skip the removal.
+          pinned_item_found = true;
+
+          continue;
+        }
+
+        // If the pinned item is not found, we should remove the unpinned
+        // variant.
+        const auto removed =
+            list_store_remove_item_by_timestamp(*it, false, n_items);
+
+        if (removed) {
+          n_items--;
+        }
+
+        hash_map_erase_ts(text_hash, *it);
+      }
+
+      if (pinned_item_found) {
+        Util::g_free_string(text);
+
+        g_debug("The new clipboard item has been discarded because there's a "
+                "duplicated pinned one.");
+
+        return;
       }
     }
 
@@ -528,7 +604,63 @@ void add_new_text_callback(gpointer user_data) {
   g_list_store_insert_sorted(list_model, item_holder, compare_clipboard_items,
                              nullptr);
 
-  g_debug("New clipboard item inserted in the list model.");
+  g_debug("New clipboard item inserted into the list model.");
+
+  return;
+}
+
+/**
+ * Here we handle the request to pin or unpin a single item.
+ * Unfortunately the GIO List Store does not arrange the items automatically
+ * when they change internally.
+ * We could use the "g_list_store_sort" function, but it's not very efficient
+ * and it emits the "items-changed" signal many times which is not ideal.
+ *
+ * A more efficient workaround is to remove the selected item and insert its
+ * copy with the pinned flag inverted.
+ * The callback receives the targeted item holder (not owned) and its relevant
+ * data is copied. Then the holder is deleted and a new item is created with the
+ * copied data plus the inverted pinned flag.
+ *
+ * This function should be called by g_idle_add_once.
+ */
+void swap_pinned_item(gpointer user_data) {
+  auto item_holder = CBWAITA_ITEM_HOLDER(user_data);
+
+  auto model_item = item_holder_get_data(item_holder);
+
+  // Text and text modified strings should be copied/duplicated with a new
+  // allocation.
+  const auto text = g_strdup(model_item->text);
+  const auto text_modified = g_strdup(model_item->text_modified);
+  const auto hash = model_item->hash;
+  const auto hash_modified = model_item->hash_modified;
+  const auto timestamp = model_item->timestamp;
+  const auto timestamp_modified = model_item->timestamp_modified;
+  const auto pinned = model_item->pinned;
+
+  // We do not need to erase the timestamp from the hash map since we have to
+  // insert a new item with the same hash_modified and (original) timestamp.
+  list_store_remove_item_by_timestamp(timestamp, pinned);
+
+  /**
+   * Here we have a reference on the duplicated item holder, but we have to
+   * drop it with g_autoptr because the list model automatically put another
+   * reference on it. The item row also put another reference, but manually.
+   *
+   * In other words, we pass the ownership of the item to the list model.
+   * Also the ownership of text and text_modified strings is moved to the item
+   * holder.
+   */
+  g_autoptr(ItemHolder) item_holder_duplicated =
+      item_holder_duplicate(text, hash, text_modified, hash_modified, timestamp,
+                            timestamp_modified, !pinned);
+
+  g_list_store_insert_sorted(list_model, item_holder_duplicated,
+                             compare_clipboard_items, nullptr);
+
+  g_debug("Duplicated item inserted with timestamp %s into the list model.",
+          Util::to_string(timestamp).c_str());
 
   return;
 }
@@ -552,15 +684,15 @@ void update_search_filter_callback(const char *search_key) {
 
 /**
  * Callback to remove the selected rows from the list.
- * The argument takes a GList containing the GtkListBoxRow selected by the
- * user. The function has the ownership of the GList, but does not own the data
+ * The argument takes a GList containing the selected GtkListBoxRow.
+ * The function has the ownership of the GList, but does not own the data
  * inside it. The GList should be unreferenced.
  * This callback should be invoked with g_idle_add_once.
  */
 void list_model_remove_selected_items(gpointer user_data) {
   auto selected_rows = static_cast<GList *>(user_data);
 
-  std::vector<uint64_t> vector_ts;
+  std::vector<std::pair<uint64_t, bool>> vector_pairs;
 
   for (auto r = selected_rows; r != nullptr; r = r->next) {
     auto row = GTK_LIST_BOX_ROW(r->data);
@@ -581,12 +713,13 @@ void list_model_remove_selected_items(gpointer user_data) {
 
     hash_map_erase_ts(model_item->hash_modified, model_item->timestamp);
 
-    vector_ts.emplace_back(model_item->timestamp);
+    vector_pairs.emplace_back(
+        std::make_pair(model_item->timestamp, model_item->pinned));
   }
 
-  const auto n_items = g_list_model_get_n_items(G_LIST_MODEL(list_model));
+  auto n_items = g_list_model_get_n_items(G_LIST_MODEL(list_model));
 
-  const auto items_to_remove = vector_ts.size();
+  const auto items_to_remove = vector_pairs.size();
 
   if (n_items == items_to_remove) {
     // If the selected rows are all the items in the list model, just call
@@ -600,8 +733,13 @@ void list_model_remove_selected_items(gpointer user_data) {
     return;
   }
 
-  for (auto it = vector_ts.cbegin(); it != vector_ts.cend(); it++) {
-    list_store_remove_item_by_timestamp(*it);
+  for (auto it = vector_pairs.cbegin(); it != vector_pairs.cend(); it++) {
+    const auto removed =
+        list_store_remove_item_by_timestamp(it->first, it->second, n_items);
+
+    if (removed) {
+      n_items--;
+    }
   }
 
   auto app_window = CbwaitaApp::get_window();

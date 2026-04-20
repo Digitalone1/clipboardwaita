@@ -88,11 +88,23 @@ static void item_holder_class_init(ItemHolderClass *klass) {
 
 static void item_holder_init(ItemHolder *self) { self->ptr = nullptr; }
 
-auto item_holder_new(const char *text, const size_t text_hash,
+auto item_holder_new(const char *const text, const size_t hash,
                      const uint64_t timestamp) -> ItemHolder * {
+  return CBWAITA_ITEM_HOLDER(
+      g_object_new(CBWAITA_TYPE_ITEM_HOLDER, "ptr",
+                   new ClipboardModelItem(text, hash, timestamp), nullptr));
+}
+
+auto item_holder_duplicate(const char *const text, const size_t hash,
+                           const char *const text_modified,
+                           const size_t hash_modified, const uint64_t timestamp,
+                           const uint64_t timestamp_modified, const bool pinned)
+    -> ItemHolder * {
   return CBWAITA_ITEM_HOLDER(g_object_new(
       CBWAITA_TYPE_ITEM_HOLDER, "ptr",
-      new ClipboardModelItem(text, text_hash, timestamp), nullptr));
+      new ClipboardModelItem(text, hash, text_modified, hash_modified,
+                             timestamp, timestamp_modified, pinned),
+      nullptr));
 }
 
 auto item_holder_get_data(const ItemHolder *item_holder)

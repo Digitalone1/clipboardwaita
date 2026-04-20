@@ -30,6 +30,8 @@ auto get_filtered_list_model() -> GtkFilterListModel *;
 
 void add_new_text_callback(gpointer user_data);
 
+void swap_pinned_item(gpointer user_data);
+
 void set_new_list_model_size(gpointer user_data);
 
 void update_search_filter_callback(const char *search_key);

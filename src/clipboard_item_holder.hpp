@@ -25,15 +25,28 @@
 /**
  * The instances of this class take ownership of the text and are responsible
  * of freeing it.
- * The text should be NON-NULL. Sending a NULL pointer to the constructor or the
- * text_modified property leads to an undefined behavior.
+ * The text should be NON-NULL. Sending a NULL pointer to the constructors or
+ * the text_modified property leads to an undefined behavior.
  */
 class ClipboardModelItem {
 public:
-  ClipboardModelItem(const char *text, const size_t text_hash,
+  // Constructor for new unpinned items.
+  ClipboardModelItem(const char *const text, const size_t hash,
                      const uint64_t timestamp)
-      : timestamp(timestamp), timestamp_modified(timestamp), text(text),
-        text_modified(text), hash(text_hash), hash_modified(text_hash) {
+      : pinned(false), timestamp(timestamp), timestamp_modified(timestamp),
+        text(text), text_modified(text), hash(hash), hash_modified(hash) {
+    // Save folded tokens for search stage.
+    update_item_search_index(text);
+  }
+
+  // Constructor for duplicated items.
+  ClipboardModelItem(const char *const text, const size_t hash,
+                     const char *const text_modified,
+                     const size_t hash_modified, const uint64_t timestamp,
+                     const uint64_t timestamp_modified, const bool pinned)
+      : pinned(pinned), timestamp(timestamp),
+        timestamp_modified(timestamp_modified), text(text),
+        text_modified(text_modified), hash(hash), hash_modified(hash_modified) {
     // Save folded tokens for search stage.
     update_item_search_index(text);
   }
@@ -58,6 +71,8 @@ public:
   }
 
   static constexpr std::hash<std::string_view> str_hash{};
+
+  const bool pinned;
 
   /**
    * The (original) timestamp is useful to sort the items in the GIO ListStore
@@ -159,8 +174,14 @@ G_DECLARE_FINAL_TYPE(ItemHolder, item_holder, CBWAITA, ITEM_HOLDER, GObject)
 
 G_END_DECLS
 
-auto item_holder_new(const char *text, const size_t text_hash,
+auto item_holder_new(const char *const text, const size_t hash,
                      const uint64_t timestamp) -> ItemHolder *;
+
+auto item_holder_duplicate(const char *const text, const size_t hash,
+                           const char *const text_modified,
+                           const size_t hash_modified, const uint64_t timestamp,
+                           const uint64_t timestamp_modified, const bool pinned)
+    -> ItemHolder *;
 
 auto item_holder_get_data(const ItemHolder *item_holder)
     -> ClipboardModelItem *;

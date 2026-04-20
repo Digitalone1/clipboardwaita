@@ -34,6 +34,8 @@ static GParamSpec *properties[N_PROPERTIES] = {nullptr};
 struct _ItemRow {
   GtkBox parent_instance;
 
+  GtkToggleButton *item_pin_toggle_button;
+
   GtkButton *item_copy_content_button;
 
   GtkLabel *datetime_label, *text_content_label;
@@ -52,6 +54,17 @@ struct _ItemRow {
 };
 
 G_DEFINE_TYPE(ItemRow, item_row, GTK_TYPE_BOX)
+
+static void on_toggled_pin_button(GtkToggleButton *self, gpointer user_data) {
+  gtk_widget_set_sensitive(GTK_WIDGET(self), 0);
+
+  g_debug("Pin/unpin request made for an item.");
+
+  auto item_row = CBWAITA_ITEM_ROW(user_data);
+
+  g_idle_add_once(ClipboardListManager::swap_pinned_item,
+                  item_row->item_holder);
+}
 
 static void copy_item_content_to_clipboard(GtkButton *, gpointer user_data) {
   auto clipboard = ClipboardWatcher::get_gdk_clipboard();
@@ -288,10 +301,18 @@ static void item_row_constructed(GObject *object) {
     return;
   }
 
+  auto model_item = item_holder_get_data(self->item_holder);
+
+  // Set pinned state. We have to do this before connecting the toggled signal.
+  gtk_toggle_button_set_active(self->item_pin_toggle_button,
+                               model_item->pinned);
+
   // Update row UI state
   item_row_update_widgets_state(self);
 
   // Left actions
+  g_signal_connect(self->item_pin_toggle_button, "toggled",
+                   G_CALLBACK(on_toggled_pin_button), self);
   g_signal_connect(self->item_copy_content_button, "clicked",
                    G_CALLBACK(copy_item_content_to_clipboard), self);
 
@@ -359,6 +380,8 @@ static void item_row_class_init(ItemRowClass *klass) {
       "/com/github/digitalone1/clipboardwaita/clipboard_list_row.ui");
 
   gtk_widget_class_bind_template_child(widget_class, ItemRow,
+                                       item_pin_toggle_button);
+  gtk_widget_class_bind_template_child(widget_class, ItemRow,
                                        item_copy_content_button);
 
   gtk_widget_class_bind_template_child(widget_class, ItemRow, datetime_label);
@@ -401,6 +424,12 @@ auto item_row_get_holder(ItemRow *item_row) -> ItemHolder * {
   return item_row->item_holder;
 }
 
+/**
+ * Update the row state. This function is invoked when the item text content
+ * changes. Note that here we do NOT touch the pin toggle button because the
+ * pinned state is constant for the model item and the toggled button state is
+ * set in the GObject widget construction stage.
+ */
 void item_row_update_widgets_state(ItemRow *item_row) {
   auto model_item = item_holder_get_data(item_row->item_holder);
 
