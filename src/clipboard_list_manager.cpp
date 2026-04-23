@@ -393,7 +393,7 @@ auto list_store_remove_item_by_timestamp(const uint64_t timestamp,
  * This method should always be used to set the folded_tokens index.
  * Passed search_key is not owned.
  */
-void update_search_index(const char *search_key) {
+void update_search_index(const char *const search_key) {
   auto old_folded_tokens = search_folded_tokens;
 
   // TODO: Investigate if we should set something more spedific for the
@@ -670,7 +670,7 @@ void swap_pinned_item(gpointer user_data) {
  * search_folded_tokens.
  * Passed search_key is not owned.
  */
-void update_search_filter_callback(const char *search_key) {
+void update_search_filter_callback(const char *const search_key) {
   update_search_index(search_key);
 
   auto match_func =
@@ -763,7 +763,8 @@ void list_model_remove_selected_items(gpointer user_data) {
  * can also free it if necessary, so we don't have to touch it after the update
  * has been completed).
  */
-void update_model_item(ClipboardModelItem *model_item, const char *new_text) {
+void update_model_item(ClipboardModelItem *model_item,
+                       const char *const new_text) {
   // Create the new timestamp (we need it only for the UI).
   model_item->timestamp_modified =
       std::chrono::duration_cast<std::chrono::seconds>(

@@ -34,10 +34,11 @@ void swap_pinned_item(gpointer user_data);
 
 void set_new_list_model_size(gpointer user_data);
 
-void update_search_filter_callback(const char *search_key);
+void update_search_filter_callback(const char *const search_key);
 
 void list_model_remove_selected_items(gpointer user_data);
 
-void update_model_item(ClipboardModelItem *model_item, const char *new_text);
+void update_model_item(ClipboardModelItem *model_item,
+                       const char *const new_text);
 
 } // namespace ClipboardListManager

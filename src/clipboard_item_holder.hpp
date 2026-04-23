@@ -123,7 +123,7 @@ public:
    * "new_text" ownership is passed here and it MUST be non-NULL.
    * Folded tokens are automatically updated.
    */
-  void update_text_modified(const char *new_text) {
+  void update_text_modified(const char *const new_text) {
     const auto new_text_hash = str_hash(new_text);
 
     if (new_text_hash == hash) {
@@ -152,7 +152,7 @@ public:
   }
 
   // This method should always be used to set folded_tokens index.
-  void update_item_search_index(const char *text) {
+  void update_item_search_index(const char *const text) {
     auto old_folded_tokens = folded_tokens;
 
     // TODO: Investigate if we should set something more spedific for the

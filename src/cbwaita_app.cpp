@@ -225,20 +225,22 @@ constexpr std::array<GActionEntry, 10> actions_{
 #pragma GCC diagnostic pop
 
 // Shortcuts
-constexpr std::array<const char *, 2> clipboard_tracking_accel{"<Control>t",
-                                                               nullptr};
-constexpr std::array<const char *, 2> background_service_accel{"<Control>b",
-                                                               nullptr};
-constexpr std::array<const char *, 2> search_mode_accel{"<Control>f", nullptr};
-constexpr std::array<const char *, 2> selection_mode_accel{"<Control>s",
+constexpr std::array<const char *const, 2> clipboard_tracking_accel{
+    "<Control>t", nullptr};
+constexpr std::array<const char *const, 2> background_service_accel{
+    "<Control>b", nullptr};
+constexpr std::array<const char *const, 2> search_mode_accel{"<Control>f",
+                                                             nullptr};
+constexpr std::array<const char *const, 2> selection_mode_accel{"<Control>s",
+                                                                nullptr};
+constexpr std::array<const char *const, 2> preferences_accel{"<Control>comma",
+                                                             nullptr};
+constexpr std::array<const char *const, 2> shortcuts_accel{"<Control>question",
                                                            nullptr};
-constexpr std::array<const char *, 2> preferences_accel{"<Control>comma",
-                                                        nullptr};
-constexpr std::array<const char *, 2> shortcuts_accel{"<Control>question",
-                                                      nullptr};
-constexpr std::array<const char *, 2> help_accel{"F1", nullptr};
-constexpr std::array<const char *, 2> close_window_accel{"<Control>w", nullptr};
-constexpr std::array<const char *, 2> quit_accel{"<Control>q", nullptr};
+constexpr std::array<const char *const, 2> help_accel{"F1", nullptr};
+constexpr std::array<const char *const, 2> close_window_accel{"<Control>w",
+                                                              nullptr};
+constexpr std::array<const char *const, 2> quit_accel{"<Control>q", nullptr};
 
 } // namespace
 
