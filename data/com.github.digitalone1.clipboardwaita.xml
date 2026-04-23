@@ -6,11 +6,11 @@
     <project_license>GPL-3.0-or-later</project_license>
 
     <name>Clipboard History</name>
-    <summary>Yet another clipboard history built with Libadwaita</summary>
+    <summary>A clipboard history manager built with Libadwaita</summary>
 
     <description>
         <p>
-            Clipboard Manager is an utility that keeps track of every copied text, allowing you to easily access and reuse clipboard history.
+            Clipboard History is an utility that keeps track of every copied text, allowing you to easily access and reuse clipboard history.
         </p>
         <p>
             Designed for GNOME and Libadwaita, it integrates seamlessly with the desktop environment and provides a clean, distraction-free interface.
