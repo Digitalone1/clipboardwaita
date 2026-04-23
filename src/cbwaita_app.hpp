@@ -25,6 +25,9 @@
 #include <gtk/gtk.h>
 
 namespace CbwaitaApp {
+
+constexpr auto app_id = "com.github.digitalone1.clipboardwaita";
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 /**

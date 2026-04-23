@@ -18,6 +18,7 @@
  */
 
 #include "preferences_dialog.hpp"
+#include "cbwaita_app.hpp"
 #include "util.hpp"
 
 // Pointers marked as NULL should be explicitly initialized in init.
@@ -172,7 +173,7 @@ static void preferences_dialog_init(PreferencesDialog *self) {
   gtk_widget_init_template(GTK_WIDGET(self));
 
   // Settings
-  self->settings = g_settings_new("com.github.digitalone1.clipboardwaita");
+  self->settings = g_settings_new(CbwaitaApp::app_id);
 
   // Clipboard tracking
 

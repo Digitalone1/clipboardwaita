@@ -23,7 +23,7 @@
 
 namespace {
 
-GSettings *settings = g_settings_new("com.github.digitalone1.clipboardwaita");
+GSettings *settings = g_settings_new(CbwaitaApp::app_id);
 AppWindow *window = nullptr;
 
 bool window_closed = true;

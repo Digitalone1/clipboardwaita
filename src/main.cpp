@@ -23,8 +23,8 @@ int main(int argc, char *argv[]) {
   try {
     g_debug("Main function.");
 
-    g_autoptr(AdwApplication) app = adw_application_new(
-        "com.github.digitalone1.clipboardwaita", G_APPLICATION_DEFAULT_FLAGS);
+    g_autoptr(AdwApplication) app =
+        adw_application_new(CbwaitaApp::app_id, G_APPLICATION_DEFAULT_FLAGS);
 
     if (app == nullptr) {
       return EXIT_FAILURE;

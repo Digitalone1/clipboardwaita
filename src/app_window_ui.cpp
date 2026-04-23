@@ -292,7 +292,7 @@ static void app_window_init(AppWindow *self) {
   gtk_widget_init_template(GTK_WIDGET(self));
 
   // Settings
-  self->settings = g_settings_new("com.github.digitalone1.clipboardwaita");
+  self->settings = g_settings_new(CbwaitaApp::app_id);
 
   // Service menu is built dinamically upon the background service option.
   self->service_section = g_menu_new();
