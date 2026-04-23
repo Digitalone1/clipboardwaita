@@ -140,12 +140,27 @@ void action_preferences(GSimpleAction *, GVariant *, gpointer) {
   app_window_open_preferences_dialog(window);
 }
 
+// TODO: Implement help.
 void action_help(GSimpleAction *, GVariant *, gpointer) {
   g_debug("Help action.");
 }
 
-void action_about(GSimpleAction *, GVariant *, gpointer) {
+void action_about(GSimpleAction *, GVariant *, gpointer user_data) {
   g_debug("About action.");
+
+  static constexpr std::array<const char *const, 2> developers = {
+      "Giusy Digitalone1 <kurmikon@yahoo.com>", nullptr};
+
+  auto window_gtk = window != nullptr
+                        ? GTK_WINDOW(window)
+                        : get_main_gtk_window(GTK_APPLICATION(user_data));
+
+  // TODO: add version, website, issue-url and translator-credits.
+  adw_show_about_dialog(
+      GTK_WIDGET(window_gtk), "application-name", "Clipboard History",
+      "application-icon", CbwaitaApp::app_id, "developer-name",
+      "Giusy Digitalone1", "developers", developers.data(), "copyright",
+      "© 2026-2027 Digitalone1", "license-type", GTK_LICENSE_GPL_3_0, nullptr);
 }
 
 /**
