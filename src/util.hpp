@@ -63,11 +63,12 @@ auto to_string(const T num, const std::string &def = "0") -> std::string {
   static constexpr auto max = std::numeric_limits<T>::digits10 +
                               std::numeric_limits<T>::max_digits10 + 10;
 
-  std::array<char, max> buffer;
+  static std::array<char, max> buffer;
 
-  const auto p_init = buffer.data();
+  constexpr auto p_init = buffer.data();
+  constexpr auto p_end = p_init + max;
 
-  const auto result = std::to_chars(p_init, p_init + max, num);
+  const auto result = std::to_chars(p_init, p_end, num);
 
   return result.ec == std::errc() ? std::string(p_init, result.ptr - p_init)
                                   : def;
