@@ -33,7 +33,7 @@ namespace CbwaitaApp {
  * The double curly brackets are intentional. Outers to initialize std::array
  * and inners to initialize the underlying C array.
  */
-inline static constexpr std::array<GOptionEntry, 3> options{
+constexpr std::array<GOptionEntry, 3> options{
     {{"toggle-window", 0, 0, G_OPTION_ARG_NONE, nullptr, "Toggle window",
       nullptr},
      {"quit", 'q', 0, G_OPTION_ARG_NONE, nullptr, "Quit running instance",

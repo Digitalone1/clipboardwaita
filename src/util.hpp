@@ -65,8 +65,8 @@ auto to_string(const T num, const std::string &def = "0") -> std::string {
 
   static std::array<char, max> buffer;
 
-  constexpr auto p_init = buffer.data();
-  constexpr auto p_end = p_init + max;
+  static constexpr auto p_init = buffer.data();
+  static constexpr auto p_end = p_init + max;
 
   const auto result = std::to_chars(p_init, p_end, num);
 

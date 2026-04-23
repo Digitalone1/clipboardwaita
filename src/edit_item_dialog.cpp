@@ -134,7 +134,7 @@ static void on_save_button_clicked(GtkButton *self, gpointer user_data) {
   dialog->new_text =
       gtk_text_buffer_get_text(dialog->item_buffer, &start, &end, 0);
 
-  constexpr std::string_view empty_str_view;
+  static constexpr std::string_view empty_str_view;
 
   // We do not allow empty strings in the item text content.
   if (dialog->new_text == nullptr ||
