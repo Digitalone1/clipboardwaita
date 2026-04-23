@@ -22,7 +22,7 @@
 
 namespace {
 
-constexpr guint poll_ms_interval_ = 1000U;
+constexpr guint poll_ms_interval = 1000U;
 
 bool first_iteration = true;
 
@@ -153,7 +153,7 @@ auto is_running() -> bool { return poll_source_id != 0U; }
  * (check if it's enabled first).
  */
 void start_service() {
-  poll_source_id = g_timeout_add_full(G_PRIORITY_DEFAULT, poll_ms_interval_,
+  poll_source_id = g_timeout_add_full(G_PRIORITY_DEFAULT, poll_ms_interval,
                                       poll_clipboard, nullptr, nullptr);
 
   g_debug("Started ClipboardWatcher service.");

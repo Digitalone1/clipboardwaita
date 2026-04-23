@@ -210,7 +210,7 @@ void action_quit(GSimpleAction *, GVariant *, gpointer user_data) {
 // GActions.
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
-constexpr std::array<GActionEntry, 10> actions_{
+constexpr std::array<GActionEntry, 10> actions{
     {{"clipboard-tracking", action_clipboard_tracking, nullptr, nullptr,
       nullptr},
      {"background", action_background, nullptr, nullptr, nullptr},
@@ -299,8 +299,8 @@ void on_startup_callback(GApplication *self, gpointer) {
   g_debug("Startup callback.");
 
   // Register Actions
-  g_action_map_add_action_entries(G_ACTION_MAP(self), actions_.data(),
-                                  G_N_ELEMENTS(actions_), self);
+  g_action_map_add_action_entries(G_ACTION_MAP(self), actions.data(),
+                                  G_N_ELEMENTS(actions), self);
 
   /**
    * Bind shortcuts for actions.
