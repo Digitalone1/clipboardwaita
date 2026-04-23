@@ -717,38 +717,39 @@ void list_model_remove_selected_items(gpointer user_data) {
         std::make_pair(model_item->timestamp, model_item->pinned));
   }
 
-  auto n_items = g_list_model_get_n_items(G_LIST_MODEL(list_model));
+  const auto n_items = g_list_model_get_n_items(G_LIST_MODEL(list_model));
 
   const auto items_to_remove = vector_pairs.size();
+  const auto clear_list = items_to_remove >= n_items;
 
-  if (n_items == items_to_remove) {
+  if (clear_list) {
     // If the selected rows are all the items in the list model, just call
-    // g_list_store_remove_all
+    // g_list_store_remove_all:
     g_list_store_remove_all(list_model);
 
     g_debug("List model cleared.");
+  } else {
+    auto num_items = n_items;
 
-    g_list_free(selected_rows);
+    for (auto it = vector_pairs.cbegin(); it != vector_pairs.cend(); it++) {
+      const auto removed =
+          list_store_remove_item_by_timestamp(it->first, it->second, num_items);
 
-    return;
-  }
-
-  for (auto it = vector_pairs.cbegin(); it != vector_pairs.cend(); it++) {
-    const auto removed =
-        list_store_remove_item_by_timestamp(it->first, it->second, n_items);
-
-    if (removed) {
-      n_items--;
+      if (removed) {
+        num_items--;
+      }
     }
   }
 
   auto app_window = CbwaitaApp::get_window();
 
+  // We show an adw toast only if more than one items have been removed.
   if (app_window != nullptr && items_to_remove > 1U) {
-    // We show an adw toast only if more than one items have been removed.
-    app_window_show_adw_toast(
-        app_window,
-        Util::to_string(items_to_remove) + " items have been removed", 2U);
+    const auto toast_text = clear_list ? "Clipboard history cleared"
+                                       : Util::to_string(items_to_remove) +
+                                             " items have been removed";
+
+    app_window_show_adw_toast(app_window, toast_text, 2U);
   }
 
   g_list_free(selected_rows);
