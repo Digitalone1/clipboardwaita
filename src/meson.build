@@ -1,4 +1,4 @@
-app_sources = [
+app_sources = files(
   'app_window_ui.cpp',
   'app_window_ui.hpp',
   'cbwaita_app.cpp',
@@ -20,15 +20,11 @@ app_sources = [
   'util.hpp',
   'wrapping_toast.cpp',
   'wrapping_toast.hpp'
-]
+)
 
 gresources = gnome.compile_resources(
   'clipboardwaita_gresource',
   'clipboardwaita.gresource.xml',
-)
-
-gnome.post_install(
-  glib_compile_schemas: true
 )
 
 executable(
@@ -40,8 +36,7 @@ executable(
     gtk,
     glib,
     gio,
-    gobject,
-    gthread
+    gobject
   ],
-  install: false
+  install: true
 )

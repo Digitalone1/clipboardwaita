@@ -1,7 +1,8 @@
-gnome.compile_schemas(
-  depend_files: 'com.github.digitalone1.clipboardwaita.gschema.xml',
-  build_by_default: true
-)
+if not meson.is_cross_build()
+  gnome.compile_schemas(
+    depend_files: files('com.github.digitalone1.clipboardwaita.gschema.xml')
+  )
+endif
 
 install_data(
   'com.github.digitalone1.clipboardwaita.gschema.xml',
