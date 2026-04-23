@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+    <id>com.github.digitalone1.clipboardwaita</id>
+
+    <metadata_license>CC0-1.0</metadata_license>
+    <project_license>GPL-3.0-or-later</project_license>
+
+    <name>Clipboard History</name>
+    <summary>Yet another clipboard history built with Libadwaita</summary>
+
+    <description>
+        <p>
+            Clipboard Manager is an utility that keeps track of every copied text, allowing you to easily access and reuse clipboard history.
+        </p>
+        <p>
+            Designed for GNOME and Libadwaita, it integrates seamlessly with the desktop environment and provides a clean, distraction-free interface.
+        </p>
+        <ul>
+            <li>Automatically stores clipboard history</li>
+            <li>Quickly search and filter previous entries</li>
+            <li>Pin important items for later use</li>
+            <li>Can be launched as a background service</li>
+        </ul>
+    </description>
+
+    <launchable type="desktop-id">
+        com.github.digitalone1.clipboardwaita
+    </launchable>
+
+    <developer id="org.example">
+        <name>Digitalone1</name>
+    </developer>
+
+    <url type="homepage">https://github.com/digitalone1/clipboardwaita/</url>
+    <url type="bugtracker">https://github.com/digitalone1/clipboardwaita/issues</url>
+
+    <categories>
+        <category>Utility</category>
+        <category>GTK</category>
+    </categories>
+
+    <keywords>
+        <keyword>clipboard</keyword>
+        <keyword>copy</keyword>
+        <keyword>paste</keyword>
+        <keyword>history</keyword>
+        <keyword>manager</keyword>
+        <keyword>productivity</keyword>
+    </keywords>
+
+    <provides>
+        <binary>clipboardwaita</binary>
+    </provides>
+
+    <content_rating type="oars-1.1" />
+</component>

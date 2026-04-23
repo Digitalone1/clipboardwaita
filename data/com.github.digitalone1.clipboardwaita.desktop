@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Clipboard History
+Comment=Track and reuse your clipboard history
+Exec=clipboardwaita
+Icon=com.github.digitalone1.clipboardwaita.svg
+Terminal=false
+Type=Application
+Categories=Utility;GTK;
+StartupNotify=true
