@@ -1,5 +1,6 @@
 [Desktop Entry]
 Name=Clipboard History
+GenericName=Clipboard History Manager
 Comment=Track and reuse your clipboard history
 Exec=clipboardwaita
 Icon=com.github.digitalone1.clipboardwaita.svg
