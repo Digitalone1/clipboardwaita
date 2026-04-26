@@ -38,6 +38,8 @@ void update_search_filter_callback(const char *const search_key);
 
 void list_model_remove_selected_items(gpointer user_data);
 
+void clear_list_model_and_hash_map();
+
 void update_model_item(ClipboardModelItem *model_item,
                        const char *const new_text);
 

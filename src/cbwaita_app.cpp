@@ -214,6 +214,15 @@ void action_quit(GSimpleAction *, GVariant *, gpointer user_data) {
 
   ClipboardWatcher::stop_service();
 
+  /**
+   * Clear the list model in order to dispose the GtkListBoxRows before the
+   * window is disposed.
+   * In some cases we observed that the GIO list model is disposed after the
+   * window object is destroyed and this leaves the GtkListBoxRows still alive
+   * (which is an unwanted behavior) because they are owned by the list model.
+   */
+  ClipboardListManager::clear_list_model_and_hash_map();
+
   g_object_unref(window);
 
   window_closed = true;
@@ -375,6 +384,8 @@ void close_window_request() {
 
   if (!background_service_enabled) {
     ClipboardWatcher::stop_service();
+
+    ClipboardListManager::clear_list_model_and_hash_map();
 
     g_object_unref(window);
   }

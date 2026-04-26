@@ -756,6 +756,18 @@ void list_model_remove_selected_items(gpointer user_data) {
 }
 
 /**
+ * This function clears the list model and the hash map.
+ * It's intended to be invoked only before the shut down of the application.
+ */
+void clear_list_model_and_hash_map() {
+  g_list_store_remove_all(list_model);
+
+  hash_map.clear();
+
+  g_debug("List model and hash map cleared.");
+}
+
+/**
  * Update the model item assigning new_text to text_modified.
  * The hash map is updated removing the old hash and adding the new one (moving
  * the timestamp accordingly).
