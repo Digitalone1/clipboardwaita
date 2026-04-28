@@ -111,6 +111,7 @@
                                     <object class="GtkPopover">
                                         <property name="child">
                                             <object class="GtkLabel">
+                                                <property name="justify">center</property>
                                                 <property name="wrap">1</property>
                                                 <property name="max-width-chars">36</property>
                                                 <property name="label" translatable="yes">Click the row to select an entry. CTRL + double click to unselect and CTRL + up/down key to select multiple entries. Exit the selection mode to unselect all.</property>
