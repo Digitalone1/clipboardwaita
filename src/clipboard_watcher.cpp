@@ -120,10 +120,6 @@ gboolean poll_clipboard(gpointer) {
    * if (gdk_content_formats_contain_gtype(formats, G_TYPE_STRING)) {...}
    */
 
-  if (!ClipboardWatcher::is_running()) {
-    return G_SOURCE_REMOVE;
-  }
-
   gdk_clipboard_read_text_async(clipboard, nullptr, clipboard_text_ready,
                                 nullptr);
 
