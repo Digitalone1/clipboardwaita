@@ -31,6 +31,7 @@
   }
 
 ENABLE_FLAGS(GBindingFlags)
+ENABLE_FLAGS(GSettingsBindFlags)
 ENABLE_FLAGS(GParamFlags)
 
 namespace Util {

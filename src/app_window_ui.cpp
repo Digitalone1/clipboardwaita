@@ -25,15 +25,6 @@
 #include "util.hpp"
 #include "wrapping_toast.hpp"
 
-// Custom CSS.
-constexpr auto custom_css = R"(
-.wrapping-toast {
-  background-color: var(--dialog-bg-color);
-  border-radius: var(--window-radius);
-  border: 1px solid var(--sidebar-bg-color);
-}
-)";
-
 // Pointers marked as NULL should be explicitly initialized in init.
 struct _AppWindow {
   AdwWindow parent_instance;
@@ -70,6 +61,12 @@ struct _AppWindow {
 
   GtkLabel *footer_list_size, *footer_list_size_mobile, *footer_bg_service,
       *footer_bg_service_mobile;
+
+  AdwDialog *first_time_alert;
+
+  GtkLabel *first_time_alert_label;
+
+  GtkCheckButton *dismiss_first_time_alert_checkbutton;
 
   GSettings *settings = nullptr;
 };
@@ -215,6 +212,44 @@ static void overlay_remove_toast(AppWindow *window) {
   window->wrapping_toast = nullptr;
 }
 
+static void set_first_time_alert_label(AppWindow *window) {
+  constexpr auto first_paragraph =
+      R"(This application monitors and shows the clipboard content to provide history features.)";
+  constexpr auto second_paragraph =
+      R"(Clipboard data can contain sensitive information (for example passwords, authentication codes or personal data). Other applications may also access clipboard contents depending on your system configuration.)";
+  constexpr auto third_paragraph =
+      R"(Enable the clipboard tracking only if you understand the risks.)";
+
+  gtk_label_set_text(window->first_time_alert_label,
+                     (std::string(first_paragraph) + "\n\n" + second_paragraph +
+                      "\n\n" + third_paragraph)
+                         .c_str());
+}
+
+static void set_custom_css() {
+  auto display = gdk_display_get_default();
+
+  if (display == nullptr) {
+    return;
+  }
+
+  constexpr auto custom_css =
+      R"(.wrapping-toast {
+  background-color: var(--dialog-bg-color);
+  border-radius: var(--window-radius);
+  border: 1px solid var(--sidebar-bg-color);
+})";
+
+  // Apply custom CSS for wrapping toasts.
+  g_autoptr(GtkCssProvider) provider = gtk_css_provider_new();
+
+  gtk_css_provider_load_from_string(provider, custom_css);
+
+  gtk_style_context_add_provider_for_display(
+      display, GTK_STYLE_PROVIDER(provider),
+      GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+}
+
 static void app_window_dispose(GObject *object) {
   auto self = CBWAITA_APP_WINDOW(object);
 
@@ -286,10 +321,19 @@ static void app_window_class_init(AppWindowClass *klass) {
                                        footer_bg_service);
   gtk_widget_class_bind_template_child(widget_class, AppWindow,
                                        footer_bg_service_mobile);
+
+  gtk_widget_class_bind_template_child(widget_class, AppWindow,
+                                       first_time_alert);
+  gtk_widget_class_bind_template_child(widget_class, AppWindow,
+                                       first_time_alert_label);
+  gtk_widget_class_bind_template_child(widget_class, AppWindow,
+                                       dismiss_first_time_alert_checkbutton);
 }
 
 static void app_window_init(AppWindow *self) {
-  gtk_widget_init_template(GTK_WIDGET(self));
+  auto self_gtk = GTK_WIDGET(self);
+
+  gtk_widget_init_template(self_gtk);
 
   // Settings
   self->settings = g_settings_new(CbwaitaApp::app_id);
@@ -380,18 +424,22 @@ static void app_window_init(AppWindow *self) {
   g_signal_connect(self, "close-request", G_CALLBACK(on_close_request_callback),
                    nullptr);
 
-  auto display = gdk_display_get_default();
+  // First time alert
+  const auto show_first_time_alert =
+      g_settings_get_boolean(self->settings, "show-first-time-alert");
 
-  // Apply custom CSS for wrapping toasts.
-  if (display != nullptr) {
-    g_autoptr(GtkCssProvider) provider = gtk_css_provider_new();
+  if (show_first_time_alert) {
+    g_settings_bind(self->settings, "show-first-time-alert",
+                    self->dismiss_first_time_alert_checkbutton, "active",
+                    G_SETTINGS_BIND_DEFAULT | G_SETTINGS_BIND_INVERT_BOOLEAN);
 
-    gtk_css_provider_load_from_string(provider, custom_css);
+    set_first_time_alert_label(self);
 
-    gtk_style_context_add_provider_for_display(
-        gdk_display_get_default(), GTK_STYLE_PROVIDER(provider),
-        GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+    adw_dialog_present(self->first_time_alert, self_gtk);
   }
+
+  // Custom CSS
+  set_custom_css();
 }
 
 auto app_window_new(GApplication *app) -> AppWindow * {

@@ -37,5 +37,9 @@
         <key name="window-maximized" type="b">
             <default>false</default>
         </key>
+
+        <key name="show-first-time-alert" type="b">
+            <default>true</default>
+        </key>
     </schema>
 </schemalist>
