@@ -295,7 +295,18 @@ auto on_handle_local_options(GApplication *self, GVariantDict *options,
       return 1;
     }
 
-    // The start-hidden option only works if the background service is enabled.
+    // The start-hidden option only works if the background service is enabled
+    // and the first time alert is already been shown.
+    const auto show_first_time_alert =
+        g_settings_get_boolean(settings, "show-first-time-alert");
+
+    if (show_first_time_alert) {
+      g_message("Cannot start the application with the window hidden bacause "
+                "the first time alert should be presented to the user.");
+
+      return -1;
+    }
+
     const auto background_service_enabled =
         g_settings_get_boolean(settings, "background-service-mode");
 
@@ -388,8 +399,6 @@ void on_activate_callback(GApplication *self, gpointer) {
   }
 
   if (start_hidden) {
-    // Do not open the window when the background service is enabled and
-    // the start-hidden command line option has been specified.
     start_hidden = false;
   } else {
     open_window(GTK_WINDOW(window));
