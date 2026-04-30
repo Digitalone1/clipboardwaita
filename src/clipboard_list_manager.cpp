@@ -197,8 +197,13 @@ void on_list_models_items_changed(GListModel *self, guint, guint, guint,
   const auto list_model_size =
       g_settings_get_uint(CbwaitaApp::get_settings(), "clipboard-history-size");
 
-  app_window_update_list_size_indicator(CbwaitaApp::get_window(), n_items,
-                                        list_model_size);
+  auto window = CbwaitaApp::get_window();
+
+  if (window == nullptr) {
+    return;
+  }
+
+  app_window_update_list_size_indicator(window, n_items, list_model_size);
 }
 
 /**
@@ -453,10 +458,15 @@ void set_new_list_model_size(gpointer user_data) {
     return;
   }
 
+  auto window = CbwaitaApp::get_window();
+
+  if (window == nullptr) {
+    return;
+  }
+
   // Here the model item is not changed, but we update the current number of
   // items in the footer indicator.
-  app_window_update_list_size_indicator(CbwaitaApp::get_window(), n_items,
-                                        new_list_size);
+  app_window_update_list_size_indicator(window, n_items, new_list_size);
 }
 
 /**
@@ -741,15 +751,15 @@ void list_model_remove_selected_items(gpointer user_data) {
     }
   }
 
-  auto app_window = CbwaitaApp::get_window();
+  auto window = CbwaitaApp::get_window();
 
   // We show an adw toast only if more than one items have been removed.
-  if (app_window != nullptr && items_to_remove > 1U) {
+  if (window != nullptr && items_to_remove > 1U) {
     const auto toast_text = clear_list ? "Clipboard history cleared"
                                        : Util::to_string(items_to_remove) +
                                              " items have been removed";
 
-    app_window_show_adw_toast(app_window, toast_text, 2U);
+    app_window_show_adw_toast(window, toast_text, 2U);
   }
 
   g_list_free(selected_rows);

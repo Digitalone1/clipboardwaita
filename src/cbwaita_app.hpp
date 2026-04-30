@@ -36,10 +36,12 @@ constexpr auto app_id = "com.github.digitalone1.clipboardwaita";
  * The double curly brackets are intentional. Outers to initialize std::array
  * and inners to initialize the underlying C array.
  */
-constexpr std::array<GOptionEntry, 3> options{
-    {{"toggle-window", 0, 0, G_OPTION_ARG_NONE, nullptr, "Toggle window",
-      nullptr},
-     {"quit", 'q', 0, G_OPTION_ARG_NONE, nullptr, "Quit running instance",
+constexpr std::array<GOptionEntry, 4> options{
+    {{"toggle-window", 0, 0, G_OPTION_ARG_NONE, nullptr,
+      "Toggle window visibility", nullptr},
+     {"start-hidden", 0, 0, G_OPTION_ARG_NONE, nullptr,
+      "Start the background service with the window closed", nullptr},
+     {"quit", 'q', 0, G_OPTION_ARG_NONE, nullptr, "Quit the application",
       nullptr},
      {nullptr}}};
 #pragma GCC diagnostic pop

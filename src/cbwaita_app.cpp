@@ -26,6 +26,7 @@ namespace {
 GSettings *settings = g_settings_new(CbwaitaApp::app_id);
 AppWindow *window = nullptr;
 
+bool start_hidden = false;
 bool window_closed = true;
 
 /**
@@ -33,11 +34,13 @@ bool window_closed = true;
  * If no window is present, it returns null.
  * We support a single window instance, no multiple ones.
  */
+/*
 auto get_main_gtk_window(GtkApplication *app) -> GtkWindow * {
   auto windows_list = gtk_application_get_windows(app);
 
   return windows_list != nullptr ? GTK_WINDOW(windows_list->data) : nullptr;
 }
+*/
 
 /**
  * When the application has no window on the first launch, this method is
@@ -47,7 +50,7 @@ auto get_main_gtk_window(GtkApplication *app) -> GtkWindow * {
  * Since we need the AppWindow object pointer to perform various tasks with the
  * UI widgets, we store its address from the new object returned in this method.
  */
-auto create_new_window(GApplication *app) -> GtkWindow * {
+void create_new_window(GApplication *app) {
   /**
    * The app owns the window, but we increase the reference count to attach
    * also our ownership in this singleton. We should unref it when the app is
@@ -69,8 +72,6 @@ auto create_new_window(GApplication *app) -> GtkWindow * {
   if (tracking_clipboard_enabled && !ClipboardWatcher::is_running()) {
     ClipboardWatcher::start_service();
   }
-
-  return GTK_WINDOW(window);
 }
 
 void open_window(GtkWindow *window_gtk) {
@@ -145,19 +146,19 @@ void action_help(GSimpleAction *, GVariant *, gpointer) {
   g_debug("Help action.");
 }
 
-void action_about(GSimpleAction *, GVariant *, gpointer user_data) {
+void action_about(GSimpleAction *, GVariant *, gpointer) {
   g_debug("About action.");
+
+  if (window == nullptr) {
+    return;
+  }
 
   static constexpr std::array<const char *const, 2> developers = {
       "Giusy Digitalone1 <kurmikon@yahoo.com>", nullptr};
 
-  auto window_gtk = window != nullptr
-                        ? GTK_WINDOW(window)
-                        : get_main_gtk_window(GTK_APPLICATION(user_data));
-
   // TODO: add version, website, issue-url and translator-credits.
   adw_show_about_dialog(
-      GTK_WIDGET(window_gtk), "application-name", "Clipboard History",
+      GTK_WIDGET(window), "application-name", "Clipboard History",
       "application-icon", CbwaitaApp::app_id, "developer-name",
       "Giusy Digitalone1", "developers", developers.data(), "copyright",
       "© 2026-2027 Digitalone1", "license-type", GTK_LICENSE_GPL_3_0, nullptr);
@@ -169,47 +170,38 @@ void action_about(GSimpleAction *, GVariant *, gpointer user_data) {
  * In normal mode the app is quit, while in the stardard mode the window is
  * hidden.
  */
-void action_toggle_window(GSimpleAction *, GVariant *, gpointer user_data) {
+void action_toggle_window(GSimpleAction *, GVariant *, gpointer) {
   g_debug("Toggle window action.");
 
-  auto window_gtk = window != nullptr
-                        ? GTK_WINDOW(window)
-                        : get_main_gtk_window(GTK_APPLICATION(user_data));
-
-  if (window_gtk == nullptr) {
-    window_gtk = create_new_window(G_APPLICATION(user_data));
-  }
-
-  if (window_closed) {
-    open_window(window_gtk);
-  } else {
-    close_window(window_gtk);
-  }
-}
-
-void action_close_window(GSimpleAction *, GVariant *, gpointer user_data) {
-  g_debug("Close window action.");
-
-  auto window_gtk = window != nullptr
-                        ? GTK_WINDOW(window)
-                        : get_main_gtk_window(GTK_APPLICATION(user_data));
-
-  if (window_gtk == nullptr) {
+  if (window == nullptr) {
     return;
   }
 
-  close_window(window_gtk);
+  if (window_closed) {
+    open_window(GTK_WINDOW(window));
+  } else {
+    close_window(GTK_WINDOW(window));
+  }
+}
+
+void action_close_window(GSimpleAction *, GVariant *, gpointer) {
+  g_debug("Close window action.");
+
+  if (window == nullptr) {
+    return;
+  }
+
+  close_window(GTK_WINDOW(window));
 }
 
 void action_quit(GSimpleAction *, GVariant *, gpointer user_data) {
   g_debug("Quit action.");
 
-  auto window_gtk = window != nullptr
-                        ? GTK_WINDOW(window)
-                        : get_main_gtk_window(GTK_APPLICATION(user_data));
-
-  if (window_gtk == nullptr) {
+  if (window == nullptr) {
+    // If the window has not been created, just quit the g_application.
     g_application_quit(G_APPLICATION(user_data));
+
+    return;
   }
 
   ClipboardWatcher::stop_service();
@@ -217,9 +209,10 @@ void action_quit(GSimpleAction *, GVariant *, gpointer user_data) {
   /**
    * Clear the list model in order to dispose the GtkListBoxRows before the
    * window is disposed.
-   * In some cases we observed that the GIO list model is disposed after the
-   * window object is destroyed and this leaves the GtkListBoxRows still alive
-   * (which is an unwanted behavior) because they are owned by the list model.
+   * In some cases we observed that on quit action the GIO list model is
+   * disposed after the window object is destroyed and this leaves the
+   * GtkListBoxRows still alive (which is an unwanted behavior) because they
+   * are owned by the GIO list model.
    */
   ClipboardListManager::clear_list_model_and_hash_map();
 
@@ -228,7 +221,7 @@ void action_quit(GSimpleAction *, GVariant *, gpointer user_data) {
   window_closed = true;
 
   // Quit action bypasses the window close logic, so we just destroy the window.
-  gtk_window_destroy(window_gtk);
+  gtk_window_destroy(GTK_WINDOW(window));
 }
 
 // GActions.
@@ -291,6 +284,31 @@ auto on_handle_local_options(GApplication *self, GVariantDict *options,
               error != nullptr ? error->message : "Unknown error");
 
     return 1;
+  }
+
+  if (g_variant_dict_contains(options, "start-hidden")) {
+    g_autoptr(GError) error = nullptr;
+
+    if (g_application_get_is_remote(self)) {
+      g_message("The application is already started.");
+
+      return 1;
+    }
+
+    // The start-hidden option only works if the background service is enabled.
+    const auto background_service_enabled =
+        g_settings_get_boolean(settings, "background-service-mode");
+
+    if (background_service_enabled) {
+      g_debug("Start the application with the window closed.");
+
+      start_hidden = true;
+    } else {
+      g_message("To start with the window closed, enable the background "
+                "service mode from the preferences.");
+    }
+
+    return -1;
   }
 
   if (g_variant_dict_contains(options, "toggle-window")) {
@@ -365,15 +383,17 @@ void on_startup_callback(GApplication *self, gpointer) {
 void on_activate_callback(GApplication *self, gpointer) {
   g_debug("Activate callback.");
 
-  auto window_gtk = window != nullptr
-                        ? GTK_WINDOW(window)
-                        : get_main_gtk_window(GTK_APPLICATION(self));
-
-  if (window_gtk == nullptr) {
-    window_gtk = create_new_window(self);
+  if (window == nullptr) {
+    create_new_window(self);
   }
 
-  open_window(window_gtk);
+  if (start_hidden) {
+    // Do not open the window when the background service is enabled and
+    // the start-hidden command line option has been specified.
+    start_hidden = false;
+  } else {
+    open_window(GTK_WINDOW(window));
+  }
 }
 
 void on_shutdown_callback(GApplication, gpointer) {

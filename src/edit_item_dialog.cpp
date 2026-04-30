@@ -65,15 +65,15 @@ static void save_new_item_text(gpointer user_data) {
     dialog->new_text = nullptr;
     adw_dialog_close(ADW_DIALOG(dialog));
 
-    auto app_window = CbwaitaApp::get_window();
+    auto window = CbwaitaApp::get_window();
 
-    if (app_window == nullptr) {
+    if (window == nullptr) {
       return;
     }
 
     // Show the overlay toast to inform the user.
     app_window_show_wrapping_toast(
-        CbwaitaApp::get_window(),
+        window,
         "The entry has not been modified because it was deleted. This likely "
         "happens when you copy the same content and \"Remove old duplicate\" "
         "option is set or the entry exceeded the maximum list size while new "

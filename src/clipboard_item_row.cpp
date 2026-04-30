@@ -165,6 +165,10 @@ static void on_item_edit_button_clicked(GtkButton *, gpointer user_data) {
 
   auto window_widget = GTK_WIDGET(CbwaitaApp::get_window());
 
+  if (window_widget == nullptr) {
+    return;
+  }
+
   adw_dialog_present(edit_item_dialog, window_widget);
 }
 
