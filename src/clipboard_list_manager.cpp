@@ -64,7 +64,7 @@ GtkFilterListModel *filtered_list_model = gtk_filter_list_model_new(
  */
 gchar **search_folded_tokens = nullptr;
 
-/*
+/**
 void print_hash_map(
     const std::map<size_t, std::vector<unix_timestamp>> &hash_map) {
   for (auto mit = hash_map.cbegin(); mit != hash_map.cend(); mit++) {
@@ -174,7 +174,7 @@ auto compare_clipboard_items(gconstpointer a, gconstpointer b, gpointer)
  * This callback is not used, but may be useful in the future in case we need
  * to use "g_list_store_find_with_equal_func".
  */
-/*
+/**
 auto equal_clipboard_items(gconstpointer a, gconstpointer b) -> gboolean {
   auto item_holder_a = static_cast<const ItemHolder *>(a);
   auto item_holder_b = static_cast<const ItemHolder *>(b);

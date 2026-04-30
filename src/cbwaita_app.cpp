@@ -34,7 +34,7 @@ bool window_closed = true;
  * If no window is present, it returns null.
  * We support a single window instance, no multiple ones.
  */
-/*
+/**
 auto get_main_gtk_window(GtkApplication *app) -> GtkWindow * {
   auto windows_list = gtk_application_get_windows(app);
 
