@@ -296,9 +296,11 @@ auto on_handle_local_options(GApplication *self, GVariantDict *options,
   if (g_variant_dict_contains(options, "toggle-window")) {
     g_autoptr(GError) error = nullptr;
 
-    // If the instance is primary, we have to start the app normally.
+    // We want to toggle the window only if the app is already started.
     if (!g_application_get_is_remote(self)) {
-      return -1;
+      g_message("To toggle the window, start the application earlier.");
+
+      return 1;
     }
 
     g_action_group_activate_action(G_ACTION_GROUP(self), "toggle-window",
@@ -309,6 +311,13 @@ auto on_handle_local_options(GApplication *self, GVariantDict *options,
 
   if (g_variant_dict_contains(options, "quit")) {
     g_autoptr(GError) error = nullptr;
+
+    // If the app is not started, we have nothing to quit.
+    if (!g_application_get_is_remote(self)) {
+      g_info("The application is already quit.");
+
+      return 1;
+    }
 
     g_action_group_activate_action(G_ACTION_GROUP(self), "quit", nullptr);
 
