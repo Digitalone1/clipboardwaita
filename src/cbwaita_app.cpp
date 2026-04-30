@@ -326,29 +326,30 @@ void on_startup_callback(GApplication *self, gpointer) {
   g_action_map_add_action_entries(G_ACTION_MAP(self), actions.data(),
                                   G_N_ELEMENTS(actions), self);
 
+  auto self_gtk = GTK_APPLICATION(self);
+
   /**
    * Bind shortcuts for actions.
    * "toggle-window" action won't have a shortcut because we want it to be
    * activated only by the command line related option.
    */
-  gtk_application_set_accels_for_action(GTK_APPLICATION(self),
-                                        "app.clipboard-tracking",
+  gtk_application_set_accels_for_action(self_gtk, "app.clipboard-tracking",
                                         clipboard_tracking_accel.data());
-  gtk_application_set_accels_for_action(GTK_APPLICATION(self), "app.background",
+  gtk_application_set_accels_for_action(self_gtk, "app.background",
                                         background_service_accel.data());
-  gtk_application_set_accels_for_action(GTK_APPLICATION(self), "app.search",
+  gtk_application_set_accels_for_action(self_gtk, "app.search",
                                         search_mode_accel.data());
-  gtk_application_set_accels_for_action(GTK_APPLICATION(self), "app.selection",
+  gtk_application_set_accels_for_action(self_gtk, "app.selection",
                                         selection_mode_accel.data());
-  gtk_application_set_accels_for_action(
-      GTK_APPLICATION(self), "app.preferences", preferences_accel.data());
-  gtk_application_set_accels_for_action(GTK_APPLICATION(self), "app.shortcuts",
+  gtk_application_set_accels_for_action(self_gtk, "app.preferences",
+                                        preferences_accel.data());
+  gtk_application_set_accels_for_action(self_gtk, "app.shortcuts",
                                         shortcuts_accel.data());
-  gtk_application_set_accels_for_action(GTK_APPLICATION(self), "app.help",
+  gtk_application_set_accels_for_action(self_gtk, "app.help",
                                         help_accel.data());
-  gtk_application_set_accels_for_action(
-      GTK_APPLICATION(self), "app.close-window", close_window_accel.data());
-  gtk_application_set_accels_for_action(GTK_APPLICATION(self), "app.quit",
+  gtk_application_set_accels_for_action(self_gtk, "app.close-window",
+                                        close_window_accel.data());
+  gtk_application_set_accels_for_action(self_gtk, "app.quit",
                                         quit_accel.data());
 }
 
