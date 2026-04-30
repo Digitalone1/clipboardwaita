@@ -23,27 +23,33 @@ int main(int argc, char *argv[]) {
   try {
     g_debug("Main function.");
 
-    g_autoptr(AdwApplication) app =
+    g_autoptr(AdwApplication) adw_app =
         adw_application_new(CbwaitaApp::app_id, G_APPLICATION_DEFAULT_FLAGS);
 
-    if (app == nullptr) {
+    if (adw_app == nullptr) {
       return EXIT_FAILURE;
     }
 
-    // Register command line options.
-    g_application_add_main_option_entries(G_APPLICATION(app),
-                                          CbwaitaApp::options.data());
+    auto g_app = G_APPLICATION(adw_app);
 
-    g_signal_connect(app, "startup",
+    // Register command line options.
+    g_application_add_main_option_entries(g_app, CbwaitaApp::options.data());
+    g_application_set_option_context_summary(
+        g_app, "A clipboard manager with history features.");
+    g_application_set_option_context_description(
+        g_app, "This application collects clipboard data and may contain "
+               "sensitive data.");
+
+    g_signal_connect(adw_app, "startup",
                      G_CALLBACK(CbwaitaApp::on_startup_callback), nullptr);
-    g_signal_connect(app, "activate",
+    g_signal_connect(adw_app, "activate",
                      G_CALLBACK(CbwaitaApp::on_activate_callback), nullptr);
-    g_signal_connect(app, "handle-local-options",
+    g_signal_connect(adw_app, "handle-local-options",
                      G_CALLBACK(CbwaitaApp::on_handle_local_options), nullptr);
-    g_signal_connect(app, "shutdown",
+    g_signal_connect(adw_app, "shutdown",
                      G_CALLBACK(CbwaitaApp::on_shutdown_callback), nullptr);
 
-    return g_application_run(G_APPLICATION(app), argc, argv);
+    return g_application_run(g_app, argc, argv);
   } catch (const std::exception &e) {
     g_critical("%s", e.what());
 
