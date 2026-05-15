@@ -40,6 +40,25 @@ guint poll_source_id = 0U;
  * This method should be called only by poll_clipboard.
  */
 void clipboard_text_ready(GObject *source, GAsyncResult *res, gpointer) {
+  // On the first iteration, we do not want to store the content, but only
+  // initialize the last hash.
+  if (first_iteration) {
+    const auto text =
+        gdk_clipboard_read_text_finish(GDK_CLIPBOARD(source), res, nullptr);
+
+    const auto text_hash = text == nullptr ? empty_str_hash : str_hash(text);
+
+    last_hash = text_hash;
+
+    g_debug("Last hash initialized in ClibpoardWatcher.");
+
+    Util::g_free_string(text);
+
+    first_iteration = false;
+
+    return;
+  }
+
   g_autoptr(GError) error = nullptr;
 
   // We take ownership of the text. If it is tracked inside the list model, we
@@ -59,18 +78,6 @@ void clipboard_text_ready(GObject *source, GAsyncResult *res, gpointer) {
   // The text is likely NULL when the clipboard is empty at the system startup.
   // In this case we treat the content as an empty string.
   const auto text_hash = text == nullptr ? empty_str_hash : str_hash(text);
-
-  if (first_iteration) {
-    // On the first iteration, we do not want to store the content, but only
-    // initialize the last hash.
-    last_hash = text_hash;
-
-    g_debug("Last hash initialized in ClibpoardWatcher.");
-
-    first_iteration = false;
-
-    return;
-  }
 
   // Compare the content hash with the last hash.
   if (text_hash == last_hash) {
